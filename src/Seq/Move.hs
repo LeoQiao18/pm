@@ -1,8 +1,7 @@
 -- | Move generation by sequential minimax algorithm
 
 module Seq.Move
-  ( printSeq
-  ) where
+  () where
 
 import           Chess                                    ( Board(..)
                                                           , Piece(..)
@@ -12,9 +11,6 @@ import           Chess                                    ( Board(..)
 import           Minimax                                  ( Depth
                                                           , MinimaxTree(..)
                                                           )
-
-printSeq :: IO ()
-printSeq = putStrLn "Seq.Move"
 
 getNextMove :: Board -> Board
 getNextMove = undefined

@@ -15,11 +15,16 @@ import           System.Environment                       ( getArgs
                                                           , getProgName
                                                           )
 import           System.Exit                              ( exitSuccess )
-import           System.IO
+import           System.IO                                ( hPutStrLn
+                                                          , print
+                                                          , stderr
+                                                          )
 
-import           Chess                                    ( Player(..) )
+import           Chess                                    ( Player(..)
+                                                          , defaultBoard
+                                                          , prettyBoard
+                                                          )
 import           Minimax                                  ( Depth )
-import qualified Seq.Move                      as S
 
 
 data PMStrategy
@@ -77,5 +82,4 @@ main = do
   let (actions, filenames, errors) = getOpt RequireOrder options args
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
-  print opts
-  S.printSeq
+  putStrLn $ prettyBoard defaultBoard
