@@ -1,6 +1,8 @@
--- |
+-- | Move generation by sequential minimax algorithm
 
-module PM where
+module Seq.Move
+  ( printSeq
+  ) where
 
 import           Chess                                    ( Board(..)
                                                           , Piece(..)
@@ -11,5 +13,21 @@ import           Minimax                                  ( Depth
                                                           , MinimaxTree(..)
                                                           )
 
--- construct minimax tree
+printSeq :: IO ()
+printSeq = putStrLn "Seq.Move"
 
+getNextMove :: Board -> Board
+getNextMove = undefined
+
+calculateTree :: Board -> Depth -> MinimaxTree
+calculateTree = undefined
+
+evaluateBoard :: Board -> Int
+evaluateBoard = undefined
+
+-- calculate moves
+getNextMoves :: Board -> [Board]
+getNextMoves = undefined
+
+getNextMovesForPosition :: Board -> Position -> [Board]
+getNextMovesForPosition = undefined

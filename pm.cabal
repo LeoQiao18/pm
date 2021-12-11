@@ -25,7 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Chess
+      Minimax
       PM
+      Seq.Move
   other-modules:
       Paths_pm
   hs-source-dirs:
