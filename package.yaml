@@ -26,7 +26,7 @@ library:
   source-dirs: src
 
 executables:
-  pm-exe:
+  pm:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
