@@ -4,7 +4,9 @@ module Chess
   ( Board(..)
   , Piece(..)
   , Position
+  , position
   , Player(..)
+  , getPieceAtPosition
   , prettyBoard
   , defaultBoard
   ) where
@@ -24,7 +26,20 @@ data Piece =
   | King
   deriving (Read, Show, Eq)
 
-type Position = (Int, Int)
+data Position = Position Int Int
+
+position r c = if isValidPosition
+  then Position r c
+  else error $ "Invalid position: " ++ show (r, c)
+ where
+  isValidPosition | (0 <= r) && (r < 8) && (0 <= c) && (c < 8) = True
+                  | otherwise = False
+
+getPieceAtPosition :: Board -> Position -> Maybe (Player, Piece)
+getPieceAtPosition (Board _ board) (Position r c) = board !! r !! c
+
+evaluateBoard :: Board -> Int
+evaluateBoard = undefined
 
 prettyBoard :: Board -> String
 prettyBoard (Board player board) =
@@ -32,8 +47,6 @@ prettyBoard (Board player board) =
     ++ show player
     ++ "\n"
     ++ concatMap (\row -> "|" ++ prettyRow row ++ "|\n") board
-
-
  where
   prettyRow (p1 : p2 : ps) = prettyPosition p1 ++ "|" ++ prettyRow (p2 : ps)
   prettyRow (p1      : ps) = prettyPosition p1

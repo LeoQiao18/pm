@@ -22,8 +22,11 @@ import           System.IO                                ( hPutStrLn
 
 import           Chess                                    ( Player(..)
                                                           , defaultBoard
+                                                          , getPieceAtPosition
+                                                          , position
                                                           , prettyBoard
                                                           )
+import           Data.Monoid                              ( Alt(getAlt) )
 import           Minimax                                  ( Depth )
 
 
@@ -41,17 +44,21 @@ data Options = Options
   { optPMStrategy :: PMStrategy
   , optDepth      :: Depth
   , optMode       :: Mode
+  , optPlayer     :: Player
   }
   deriving (Show, Eq)
 
 defaultOptions :: Options
-defaultOptions =
-  Options { optPMStrategy = MinimaxSeq, optDepth = 5, optMode = Interactive }
+defaultOptions = Options { optPMStrategy = MinimaxSeq
+                         , optDepth      = 5
+                         , optMode       = Interactive
+                         , optPlayer     = Black
+                         }
 
 usage :: IO Options
 usage = do
   prg <- getProgName
-  let header = "Usage: " ++ prg ++ " [option]... [file]"
+  let header = "Usage: " ++ prg ++ " [option]... [player] [file]"
   hPutStrLn stderr (usageInfo header options)
   exitSuccess
 
@@ -73,6 +80,11 @@ options =
             "<strategy>"
     )
     "Strategy for minimax"
+  , Option
+    "p"
+    ["player"]
+    (ReqArg (\player opt -> return opt { optPlayer = read player }) "<player>")
+    "Player that the engine is playing as"
   , Option "h" ["help"] (NoArg (const usage)) "Print help"
   ]
 
@@ -82,4 +94,7 @@ main = do
   let (actions, filenames, errors) = getOpt RequireOrder options args
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
-  putStrLn $ prettyBoard defaultBoard
+  print opts
+  putStr $ prettyBoard defaultBoard
+  print $ getPieceAtPosition defaultBoard (position 1 1)
+  print $ getPieceAtPosition defaultBoard (position 0 0)
