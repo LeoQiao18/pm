@@ -21,10 +21,10 @@ import           System.IO                                ( hPutStrLn
                                                           )
 
 import           Chess                                    ( Player(..)
+                                                          , defaultGame
                                                           , defaultBoard
-                                                          , getPieceAtPosition
-                                                          , position
-                                                          , prettyBoard
+                                                          , atPos
+                                                          , prettyGame
                                                           )
 import           Data.Monoid                              ( Alt(getAlt) )
 import           Minimax                                  ( Depth )
@@ -95,6 +95,6 @@ main = do
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
   print opts
-  putStr $ prettyBoard defaultBoard
-  print $ getPieceAtPosition defaultBoard (position 1 1)
-  print $ getPieceAtPosition defaultBoard (position 0 0)
+  putStr $ prettyGame defaultGame
+  print $ defaultBoard `atPos` (1, 1)
+

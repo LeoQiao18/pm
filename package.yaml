@@ -37,12 +37,13 @@ executables:
     - pm
 
 tests:
-  pm-test:
+  chess-test:
     main:                Spec.hs
-    source-dirs:         test
+    source-dirs:         test/chess
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - pm
+    - hspec

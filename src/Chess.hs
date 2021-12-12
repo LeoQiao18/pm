@@ -1,21 +1,39 @@
 -- | Chess representations
 
 module Chess
-  ( Board(..)
+  ( Board
+  , board
+  , Game(..)
   , Piece(..)
   , Position
-  , position
   , Player(..)
-  , getPieceAtPosition
-  , prettyBoard
+  , atPos
+  , prettyGame
+  , defaultGame
   , defaultBoard
   ) where
 import           Data.Char                                ( toLower )
 
+data Game = Game
+  { gamePlayer :: Player
+  , gameBoard  :: Board
+  }
+  deriving (Read, Show, Eq)
+
 data Player = Black | White deriving (Read, Show, Eq)
 
-data Board = Board Player [[Maybe (Player, Piece)]]
-  deriving (Read, Show, Eq)
+newtype Board = Board [[Maybe (Player, Piece)]] deriving (Read, Show, Eq)
+
+-- Board data constructor is internal;
+-- this board function does dimension check on the 2D list
+board :: [[Maybe (Player, Piece)]] -> Board
+board b = if isValidBoard
+  then Board b
+  else error "Dimension of board is not 8*8"
+ where
+  validNumOfRows    = length b == 8
+  validNumOfColumns = all (\row -> length row == 8) b
+  isValidBoard      = validNumOfRows && validNumOfColumns
 
 data Piece =
    Pawn
@@ -26,28 +44,26 @@ data Piece =
   | King
   deriving (Read, Show, Eq)
 
-data Position = Position Int Int
+type Position = (Int, Int)
 
-position r c = if isValidPosition
-  then Position r c
-  else error $ "Invalid position: " ++ show (r, c)
+-- atPos also checks index range to be within 8*8
+atPos :: Board -> Position -> Maybe (Player, Piece)
+atPos (Board b) pos@(r, c) = if isValidPosition
+  then b !! r !! c
+  else error $ "Invalid position: " ++ show pos
  where
   isValidPosition | (0 <= r) && (r < 8) && (0 <= c) && (c < 8) = True
                   | otherwise = False
 
-getPieceAtPosition :: Board -> Position -> Maybe (Player, Piece)
-getPieceAtPosition (Board _ board) (Position r c) = board !! r !! c
-
 evaluateBoard :: Board -> Int
 evaluateBoard = undefined
 
-prettyBoard :: Board -> String
-prettyBoard (Board player board) =
-  "> Player: "
-    ++ show player
-    ++ "\n"
-    ++ concatMap (\row -> "|" ++ prettyRow row ++ "|\n") board
+-- pretty print Game
+prettyGame :: Game -> String
+prettyGame g = "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard
+  (gameBoard g)
  where
+  prettyBoard (Board b) = concatMap (\row -> "|" ++ prettyRow row ++ "|\n") b
   prettyRow (p1 : p2 : ps) = prettyPosition p1 ++ "|" ++ prettyRow (p2 : ps)
   prettyRow (p1      : ps) = prettyPosition p1
   prettyRow []             = error "Can't pretty print an empty board row"
@@ -58,10 +74,14 @@ prettyBoard (Board player board) =
         piece'  = toLower . head . show $ piece
     in  [player', piece']
 
+-- default start game state
+defaultGame :: Game
+defaultGame = Game { gamePlayer = Black, gameBoard = defaultBoard }
+
 defaultBoard :: Board
-defaultBoard = Board Black board'
+defaultBoard = board b
  where
-  board' =
+  b =
     [ [ Just (Black, Rook)
       , Just (Black, Knight)
       , Just (Black, Bishop)
