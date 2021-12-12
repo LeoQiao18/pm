@@ -24,6 +24,8 @@ dependencies:
 
 library:
   source-dirs: src
+  dependencies:
+    - matrix
 
 executables:
   pm:
@@ -35,6 +37,9 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - pm
+    when:
+    - condition: false
+      other-modules: Paths_pm
 
 tests:
   chess-test:
