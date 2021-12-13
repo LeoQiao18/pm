@@ -3,6 +3,7 @@
 module Chess
   ( Board(..)
   , board
+  , BoardPiece(..)
   , Game(..)
   , Piece(..)
   , Position
