@@ -11,7 +11,9 @@ import           Test.Hspec                               ( Spec(..)
                                                           , it
                                                           , shouldBe
                                                           )                                           
-import           Seq.Move                                 ( evaluateBoard )
+import           Seq.Move                                 ( evaluateBoard
+                                                          , getNextMove
+                                                          )
 
 testBoard1 = board b
  where b =
