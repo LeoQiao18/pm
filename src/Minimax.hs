@@ -5,7 +5,7 @@ module Minimax
     , Depth
     ) where
 
-import           Chess                                    ( Board(..) )
+import           Chess                                    ( Game(..) )
 
-data MinimaxTree = MinimaxNode Int Board [MinimaxTree] | MinimaxLeaf Int Board
+data MinimaxTree = MinimaxNode Int Game [MinimaxTree] | MinimaxLeaf Int Game
 type Depth = Int

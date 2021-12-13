@@ -2,46 +2,65 @@
 
 module Seq.Move
   ( getAllNextPos,
-    getNextMoves
+    getNextMoves,
+    evaluateBoard
   ) where
 
 import           Chess                                    ( Board(..)
+                                                          , Game(..)
                                                           , BoardPiece(..)
                                                           , Piece(..)
                                                           , Player(..)
                                                           , Position(..)
-                                                          , atPos
+                                                          , atPos, Game (gameBoard, gamePlayer)
                                                           )
 import           Minimax                                  ( Depth
                                                           , MinimaxTree(..)
                                                           )
 import           Data.Matrix                              ( setElem )
 import qualified Data.Maybe
-import           Control.Monad                            ( guard )
 
 getNextMove :: Board -> Board
 getNextMove = undefined
 
-calculateTree :: Board -> Depth -> MinimaxTree
-calculateTree = undefined
+-- calculateTree :: Game -> Depth -> MinimaxTree
+-- calculateTree game depth = let tree = constructTree 1 game
+--   where constructTree curDepth curGame
+--           | curDepth == depth = MinimaxLeaf 0 curGame
+--           | otherwise = let nextMoves = getNextMoves curGame
+--                         in MinimaxNode 0 curGame (map (constructTree (curDepth+1)) nextMoves)
+          
 
-evaluateBoard :: Board -> Int
-evaluateBoard = undefined
+evaluateBoard :: Board -> Player -> Int
+evaluateBoard board player = foldl addValue 0 allPos
+  where allPos = [(x,y) | x <- [1..8], y <- [1..8]]
+        addValue sum pos = case board `atPos` pos of
+          Nothing -> sum
+          Just (curPlayer, piece) -> let mult = if player == curPlayer then 1 else (-1) in
+                                     sum + mult * pieceValue piece
+        pieceValue piece = case piece of
+          Pawn -> 10
+          Knight -> 30
+          Bishop -> 30
+          Rook -> 50
+          Queen -> 90
+          King -> 200
 
--- calculate moves
-getNextMoves :: Board -> Player -> [Board]
-getNextMoves board curPlayer = do pos <- filter isCand allPos
-                                  getNextMovesForPosition board pos
-  where isCand pos = case board `atPos` pos of
+-- get all possible next game states for the current player
+getNextMoves :: Game -> [Game]
+getNextMoves game@(Game {gamePlayer=player, gameBoard=board@(Board b)}) = 
+  do pos <- filter isValid allPos
+     getNextMovesForPosition game pos
+  where isValid pos = case board `atPos` pos of
           Nothing -> False 
-          Just (player, _) -> player == curPlayer
+          Just (curPlayer, _) -> curPlayer == player
         allPos = [ (x,y) | x <- [1..8], y <- [1..8] ]
-
-getNextMovesForPosition :: Board -> Position -> [Board]
-getNextMovesForPosition board@(Board b) pos = map nextPosToMove allNextPos
-  where nextPosToMove nextPos = let b' = setElem elem nextPos b in Board (setElem Nothing pos b')
-        elem = board `atPos` pos
-        allNextPos = getAllNextPos board pos elem
+        getNextMovesForPosition game pos = map (nextPosToMove pos) allNextPos
+          where elem = board `atPos` pos
+                nextPosToMove pos nextPos = let b' = setElem elem nextPos b in 
+                                            let b'' = setElem Nothing pos b' in
+                                            Game {gamePlayer = otherPlayer player, gameBoard = Board b''}
+                allNextPos = getAllNextPos board pos elem              
 
 -- get all valid next positions for a certain piece on the board
 getAllNextPos :: Board -> (Int, Int) -> BoardPiece -> [(Int, Int)]
@@ -76,3 +95,7 @@ getAllNextPos board pos@(x,y) (Just (player, piece)) = case piece of
       | otherwise = (x',y'):allPosInDirection (mult+1) (xDir,yDir)
       where (x',y') = (x+mult*xDir, y+mult*yDir)
             dest = board `atPos` (x',y')
+
+otherPlayer :: Player -> Player 
+otherPlayer Black = White 
+otherPlayer White = Black
