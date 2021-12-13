@@ -15,25 +15,20 @@ import           System.Environment                       ( getArgs
                                                           , getProgName
                                                           )
 import           System.Exit                              ( exitSuccess )
-import           System.IO                                ( hFlush
-                                                          , hPutStrLn
+import           System.IO                                ( hPutStrLn
                                                           , print
                                                           , stderr
-                                                          , stdout
                                                           )
 
-import           Chess                                    ( Game(..)
-                                                          , Player(..)
+import           Chess                                    ( Player(..)
                                                           , atPos
                                                           , defaultBoard
                                                           , defaultGame
-                                                          , prettyBoard
+                                                          , gameScore
+                                                          , prettyGame
                                                           )
-import           Control.Monad                            ( unless )
 import           Data.Monoid                              ( Alt(getAlt) )
-import           Minimax.Common                           ( Depth )
-import           Minimax.Par.Move                         ( bestMove )
-import           Rules                                    ( isGameOver )
+import           Minimax                                  ( Depth )
 
 
 data PMStrategy
@@ -100,28 +95,8 @@ main = do
   let (actions, filenames, errors) = getOpt RequireOrder options args
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
-  -- print opts
-  putStr "Run minimax with depth: "
-  hFlush stdout
-  s <- getLine
-  let depth = read s
-  putStr "Specify parallel depth: "
-  hFlush stdout
-  s <- getLine
-  let parDepth = read s
-  startGame parDepth depth
- where
-  startGame parDepth depth =
-    let loop turn g = do
-          putStrLn
-            $  "> Turn "
-            ++ show turn
-            ++ ", "
-            ++ show (gamePlayer g)
-            ++ "'s move:"
-          putStrLn $ prettyBoard $ gameBoard g
-          putStrLn ""
-          unless (isGameOver g) $ do
-            let g' = bestMove parDepth depth g
-            loop (turn + 1) g'
-    in  loop 1 defaultGame
+  print opts
+  putStrLn $ prettyGame defaultGame
+  print $ defaultBoard `atPos` (1, 1)
+  print defaultGame
+  print $ gameScore defaultGame
