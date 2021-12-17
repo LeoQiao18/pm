@@ -9,6 +9,9 @@ module Chess
   , Position
   , Player(..)
   , atPos
+  , getBoardMatrix
+  , setBoardPiece
+  , setPlayer
   , prettyGame
   , prettyBoard
   , defaultGame
@@ -21,6 +24,7 @@ import           Data.Matrix                              ( (!)
                                                           , Matrix
                                                           , fromLists
                                                           , matrix
+                                                          , setElem
                                                           , toLists
                                                           )
 
@@ -65,8 +69,20 @@ type Position = (Int, Int)
 
 
 -- unsafe: get piece at position
-atPos :: Board -> Position -> BoardPiece
-atPos (Board b) pos = b ! pos
+atPos :: Game -> Position -> BoardPiece
+atPos g pos = getBoardMatrix g ! pos
+
+getBoardMatrix :: Game -> Matrix BoardPiece
+getBoardMatrix Game { gameBoard = Board b } = b
+
+-- update game board
+setBoardPiece :: Game -> Position -> BoardPiece -> Game
+setBoardPiece g@Game { gameBoard = Board b } pos bp =
+  g { gameBoard = Board $ setElem bp pos b }
+
+setPlayer :: Game -> Player -> Game
+setPlayer g p = g { gamePlayer = p }
+
 
 -- pretty print Game
 prettyGame :: Game -> String

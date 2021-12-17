@@ -1,13 +1,13 @@
 -- | Move generation by sequential minimax algorithm
 
-module Seq.Move
+module Minimax.Seq.Move
   ( bestMove
   ) where
 
 import           Chess                                    ( Game(..)
                                                           , Player(..)
                                                           )
-import           Minimax                                  ( Depth )
+import           Minimax.Common                           ( Depth )
 import           Rules                                    ( legalMoves )
 import           Score                                    ( Score
                                                           , gameScore

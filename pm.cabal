@@ -26,10 +26,10 @@ source-repository head
 library
   exposed-modules:
       Chess
-      Minimax
+      Minimax.Common
+      Minimax.Seq.Move
       Rules
       Score
-      Seq.Move
   other-modules:
       Paths_pm
   hs-source-dirs:
@@ -53,8 +53,8 @@ test-suite chess-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Tests.BoardScoreSpec
       Tests.GameSerializationSpec
-      Tests.MinimaxLogicSpec
       Tests.MoveGenerationSpec
       Paths_pm
   hs-source-dirs:

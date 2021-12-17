@@ -55,7 +55,7 @@ positionBonus (Just (player, piece)) pos = bonusMap player piece ! pos
 
 bonusMap :: Player -> Piece -> Matrix Score
 bonusMap White piece = pieceBonusMap piece
-bonusMap Black piece = reflectOverX $ pieceBonusMap piece
+bonusMap Black piece = fmap negate $ reflectOverX $ pieceBonusMap piece
   where
     reflectOverX mat =
         switchRows 1 8 $ switchRows 2 7 $ switchRows 3 6 $ switchRows 4 5 mat

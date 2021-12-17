@@ -31,9 +31,9 @@ import           Chess                                    ( Game(..)
                                                           )
 import           Control.Monad                            ( unless )
 import           Data.Monoid                              ( Alt(getAlt) )
-import           Minimax                                  ( Depth )
+import           Minimax.Common                           ( Depth )
+import           Minimax.Seq.Move                         ( bestMove )
 import           Rules                                    ( isGameOver )
-import           Seq.Move                                 ( bestMove )
 
 
 data PMStrategy
