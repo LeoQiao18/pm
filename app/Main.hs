@@ -21,13 +21,16 @@ import           System.IO                                ( hPutStrLn
                                                           )
 
 import           Chess                                    ( Player(..)
+                                                          , atPos
                                                           , defaultBoard
                                                           , defaultGame
                                                           , prettyGame
-                                                          , atPos
                                                           )
+import           Control.Monad                            ( unless )
 import           Data.Monoid                              ( Alt(getAlt) )
 import           Minimax                                  ( Depth )
+import           Rules                                    ( isGameOver )
+import           Seq.Move                                 ( bestMove )
 
 
 data PMStrategy
@@ -95,5 +98,11 @@ main = do
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
   print opts
-  putStrLn $ prettyGame defaultGame
-  print $ defaultBoard `atPos` (1, 1)
+  loop defaultGame
+ where
+  loop g = do
+    putStrLn $ prettyGame g
+    putStrLn ""
+    unless (isGameOver g) $ do
+      let g' = bestMove 5 g
+      loop g'

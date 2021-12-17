@@ -27,7 +27,8 @@ library
   exposed-modules:
       Chess
       Minimax
-      PM
+      Rules
+      Score
       Seq.Move
   other-modules:
       Paths_pm

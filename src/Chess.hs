@@ -130,13 +130,3 @@ defaultBoard = board b
       , Just (White, Rook)
       ]
     ]
-
--- board evaluation
--- evaluateBoard :: Board -> Int
--- evaluateBoard (Board b) = foldl (foldl addPieceScore) 0 b
---   where addPieceScore score Nothing = score
---         addPieceScore score (Just (Black, p)) =
---         addPieceScore score (Just (White, p)) =
-
-
--- pieceFactorMap :: Piece
