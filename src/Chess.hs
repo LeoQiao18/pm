@@ -10,6 +10,7 @@ module Chess
   , Player(..)
   , atPos
   , prettyGame
+  , prettyBoard
   , defaultGame
   , defaultBoard
   ) where
@@ -68,11 +69,14 @@ atPos (Board b) pos = b ! pos
 
 -- pretty print Game
 prettyGame :: Game -> String
-prettyGame g = "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard
-  (gameBoard g)
+prettyGame g =
+  "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard (gameBoard g)
+
+prettyBoard :: Board -> String
+prettyBoard (Board b) = intercalate "\n" . map prettyRow . toLists $ fmap
+  prettyBoardPiece
+  b
  where
-  prettyBoard (Board b) =
-    intercalate "\n" . map prettyRow . toLists $ fmap prettyBoardPiece b
   prettyRow row = "|" ++ intercalate "|" row ++ "|"
   prettyBoardPiece Nothing  = "  "
   prettyBoardPiece (Just p) = prettyPiece p

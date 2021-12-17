@@ -20,11 +20,12 @@ import           System.IO                                ( hPutStrLn
                                                           , stderr
                                                           )
 
-import           Chess                                    ( Player(..)
+import           Chess                                    ( Game(..)
+                                                          , Player(..)
                                                           , atPos
                                                           , defaultBoard
                                                           , defaultGame
-                                                          , prettyGame
+                                                          , prettyBoard
                                                           )
 import           Control.Monad                            ( unless )
 import           Data.Monoid                              ( Alt(getAlt) )
@@ -98,11 +99,17 @@ main = do
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
   print opts
-  loop defaultGame
+  loop 1 defaultGame
  where
-  loop g = do
-    putStrLn $ prettyGame g
+  loop turn g = do
+    putStrLn
+      $  "> Turn "
+      ++ show turn
+      ++ ", "
+      ++ show (gamePlayer g)
+      ++ "'s move:"
+    putStrLn $ prettyBoard $ gameBoard g
     putStrLn ""
     unless (isGameOver g) $ do
       let g' = bestMove 5 g
-      loop g'
+      loop (turn + 1) g'
