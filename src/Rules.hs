@@ -49,9 +49,11 @@ legalMovesForPos g@Game { gamePlayer = player, gameBoard = Board b } pos@(r, c)
     movesForPiece Pawn = case player of
         Black ->
             let normalStep = validEmpty [(r + 1, c)]
-                doubleStep = if r == 2 then validEmpty [(r + 2, c)] else []
-                takes      = validTake [(r + 1, c - 1), (r + 1, c + 1)]
-                poses      = normalStep ++ doubleStep ++ takes
+                doubleStep = if r == 2 && isEmpty (b ! (3, c))
+                    then validEmpty [(r + 2, c)]
+                    else []
+                takes = validTake [(r + 1, c - 1), (r + 1, c + 1)]
+                poses = normalStep ++ doubleStep ++ takes
                 newBoards newpos@(r, c)
                     | r == 8
                     = let promotions = [Pawn, Knight, Bishop, Rook, Queen]
@@ -61,9 +63,11 @@ legalMovesForPos g@Game { gamePlayer = player, gameBoard = Board b } pos@(r, c)
             in  map makeGame $ concatMap newBoards poses
         White ->
             let normalStep = validEmpty [(r - 1, c)]
-                doubleStep = if r == 7 then validEmpty [(r - 2, c)] else []
-                takes      = validTake [(r - 1, c - 1), (r - 1, c + 1)]
-                poses      = normalStep ++ doubleStep ++ takes
+                doubleStep = if r == 7 && isEmpty (b ! (6, c))
+                    then validEmpty [(r - 2, c)]
+                    else []
+                takes = validTake [(r - 1, c - 1), (r - 1, c + 1)]
+                poses = normalStep ++ doubleStep ++ takes
                 newBoards newpos@(r, c)
                     | r == 1
                     = let promotions = [Pawn, Knight, Bishop, Rook, Queen]
