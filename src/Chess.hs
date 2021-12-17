@@ -63,6 +63,7 @@ data Piece =
 
 type Position = (Int, Int)
 
+
 -- unsafe: get piece at position
 atPos :: Board -> Position -> BoardPiece
 atPos (Board b) pos = b ! pos

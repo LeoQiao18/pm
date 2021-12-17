@@ -15,9 +15,11 @@ import           System.Environment                       ( getArgs
                                                           , getProgName
                                                           )
 import           System.Exit                              ( exitSuccess )
-import           System.IO                                ( hPutStrLn
+import           System.IO                                ( hFlush
+                                                          , hPutStrLn
                                                           , print
                                                           , stderr
+                                                          , stdout
                                                           )
 
 import           Chess                                    ( Game(..)
@@ -98,18 +100,24 @@ main = do
   let (actions, filenames, errors) = getOpt RequireOrder options args
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
-  print opts
-  loop 1 defaultGame
+  -- print opts
+  putStr "Run sequential minimax with depth: "
+  hFlush stdout
+  s <- getLine
+  let depth = read s
+  startGame depth
  where
-  loop turn g = do
-    putStrLn
-      $  "> Turn "
-      ++ show turn
-      ++ ", "
-      ++ show (gamePlayer g)
-      ++ "'s move:"
-    putStrLn $ prettyBoard $ gameBoard g
-    putStrLn ""
-    unless (isGameOver g) $ do
-      let g' = bestMove 5 g
-      loop (turn + 1) g'
+  startGame depth =
+    let loop turn g = do
+          putStrLn
+            $  "> Turn "
+            ++ show turn
+            ++ ", "
+            ++ show (gamePlayer g)
+            ++ "'s move:"
+          putStrLn $ prettyBoard $ gameBoard g
+          putStrLn ""
+          unless (isGameOver g) $ do
+            let g' = bestMove depth g
+            loop (turn + 1) g'
+    in  loop 1 defaultGame

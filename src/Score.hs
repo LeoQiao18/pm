@@ -20,8 +20,6 @@ import           Data.Matrix                              ( (!)
 
 type Score = Float
 
-type Multiplier = Float
-
 gameScore :: Game -> Score
 gameScore g = boardScore $ gameBoard g
 
@@ -33,10 +31,10 @@ boardScore (Board b) = foldl
     where indicies = [ (r, c) | r <- [1 .. 8], c <- [1 .. 8] ]
 
 positionScore :: BoardPiece -> Position -> Score
-positionScore bp pos = multiplier * score
+positionScore bp pos = score + bonus
   where
-    multiplier = positionMultiplier bp pos
-    score      = boardPieceScore bp
+    score = boardPieceScore bp
+    bonus = positionBonus bp pos
 
 boardPieceScore :: BoardPiece -> Score
 boardPieceScore Nothing           = 0
@@ -51,18 +49,17 @@ pieceScore Rook   = 50
 pieceScore Queen  = 90
 pieceScore King   = 900
 
-positionMultiplier :: BoardPiece -> Position -> Multiplier
-positionMultiplier Nothing _ = 0
-positionMultiplier (Just (player, piece)) pos =
-    multiplierMap player piece ! pos
+positionBonus :: BoardPiece -> Position -> Score
+positionBonus Nothing                _   = 0
+positionBonus (Just (player, piece)) pos = bonusMap player piece ! pos
 
-multiplierMap :: Player -> Piece -> Matrix Multiplier
-multiplierMap White piece = pieceMultiplierMap piece
-multiplierMap Black piece = reflectOverX $ pieceMultiplierMap piece
+bonusMap :: Player -> Piece -> Matrix Score
+bonusMap White piece = pieceBonusMap piece
+bonusMap Black piece = reflectOverX $ pieceBonusMap piece
   where
     reflectOverX mat =
         switchRows 1 8 $ switchRows 2 7 $ switchRows 3 6 $ switchRows 4 5 mat
-pieceMultiplierMap Pawn = fromLists
+pieceBonusMap Pawn = fromLists
     [ [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     , [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
     , [1.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 1.0]
@@ -72,7 +69,7 @@ pieceMultiplierMap Pawn = fromLists
     , [0.5, 1.0, 1.0, -2.0, -2.0, 1.0, 1.0, 0.5]
     , [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     ]
-pieceMultiplierMap Knight = fromLists
+pieceBonusMap Knight = fromLists
     [ [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]
     , [-4.0, -2.0, 0.0, 0.0, 0.0, 0.0, -2.0, -4.0]
     , [-3.0, 0.0, 1.0, 1.5, 1.5, 1.0, 0.0, -3.0]
@@ -82,7 +79,7 @@ pieceMultiplierMap Knight = fromLists
     , [-4.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0]
     , [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]
     ]
-pieceMultiplierMap Bishop = fromLists
+pieceBonusMap Bishop = fromLists
     [ [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
     , [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0]
     , [-1.0, 0.0, 0.5, 1.0, 1.0, 0.5, 0.0, -1.0]
@@ -92,7 +89,7 @@ pieceMultiplierMap Bishop = fromLists
     , [-1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, -1.0]
     , [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
     ]
-pieceMultiplierMap Rook = fromLists
+pieceBonusMap Rook = fromLists
     [ [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     , [0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5]
     , [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5]
@@ -102,7 +99,7 @@ pieceMultiplierMap Rook = fromLists
     , [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5]
     , [0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0]
     ]
-pieceMultiplierMap Queen = fromLists
+pieceBonusMap Queen = fromLists
     [ [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
     , [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0]
     , [-1.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0]
@@ -112,7 +109,7 @@ pieceMultiplierMap Queen = fromLists
     , [-1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, -1.0]
     , [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
     ]
-pieceMultiplierMap King = fromLists
+pieceBonusMap King = fromLists
     [ [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0]
     , [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0]
     , [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0]
