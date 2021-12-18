@@ -29,6 +29,7 @@ library
       Minimax.Common
       Minimax.Move
       Minimax.Par.Move
+      Minimax.ParAB.Move
       Minimax.Seq.Move
       Minimax.SeqAB.Move
       Rules
