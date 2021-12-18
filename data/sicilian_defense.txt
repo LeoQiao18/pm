@@ -1,0 +1,8 @@
+br,bk,bb,bq,bx,bb,bk,br,
+bp,bp, ,bp,bp,bp,bp,bp,
+ , , , , , , , ,
+ , ,bp, , , , , ,
+ , , , ,wp, , , ,
+ , , , , , , , ,
+wp,wp,wp,wp, ,wp,wp,wp,
+wr,wk,wb,wq,wx,wb,wk,wr,

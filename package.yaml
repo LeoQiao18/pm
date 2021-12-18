@@ -35,6 +35,7 @@ executables:
     ghc-options:
     - -threaded
     - -rtsopts
+    - -eventlog
     - -with-rtsopts=-N
     dependencies:
     - pm
@@ -49,6 +50,7 @@ tests:
     ghc-options:
     - -threaded
     - -rtsopts
+    - -eventlog
     - -with-rtsopts=-N
     dependencies:
     - pm
