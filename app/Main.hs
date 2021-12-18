@@ -33,16 +33,14 @@ import           Chess                                    ( Board(..)
                                                           )
 import           Control.Monad                            ( unless )
 import           Data.Char                                ( isSpace )
+import           Data.List.Split                          ( splitOn )
 import           Data.Monoid                              ( Alt(getAlt) )
 import           Minimax.Common                           ( Depth )
-import           Minimax.Seq.Move                         ( bestMove )
+import           Minimax.Move                             ( PMStrategy(..)
+                                                          , bestMove
+                                                          )
 import           Rules                                    ( isGameOver )
 
-
-data PMStrategy
-  = MinimaxSeq
-  | MinimaxPar
-  deriving (Read, Show, Eq)
 
 data Mode
   = Interactive
@@ -51,7 +49,6 @@ data Mode
 
 data Options = Options
   { optPMStrategy :: PMStrategy
-  , optDepth      :: Depth
   , optMode       :: Mode
   , optPlayer     :: Player
   , optBoardSrc   :: String
@@ -59,8 +56,7 @@ data Options = Options
   deriving (Show, Eq)
 
 defaultOptions :: Options
-defaultOptions = Options { optPMStrategy = MinimaxSeq
-                         , optDepth      = 5
+defaultOptions = Options { optPMStrategy = MinimaxSeq 5
                          , optMode       = Interactive
                          , optPlayer     = Black
                          , optBoardSrc   = ""
@@ -80,15 +76,19 @@ options =
            (ReqArg (\mode opt -> return opt { optMode = read mode }) "<mode>")
            "Mode to run the engine"
   , Option
-    "d"
-    ["depth"]
-    (ReqArg (\depth opt -> return opt { optDepth = read depth }) "<depth>")
-    "Depth of minimax search"
-  , Option
     "s"
     ["strategy"]
-    (ReqArg (\pmStrat opt -> return opt { optPMStrategy = read pmStrat })
-            "<strategy>"
+    (ReqArg
+      (\pmStrat opt ->
+        let splitStrat = splitOn "," pmStrat
+            pmStrat'   = case head splitStrat of
+              "MinimaxSeq" -> MinimaxSeq (read $ splitStrat !! 1)
+              "MinimaxPar" ->
+                MinimaxPar (read $ splitStrat !! 1) (read $ splitStrat !! 2)
+              _ -> error "Invalid PMStrategy"
+        in  return opt { optPMStrategy = pmStrat' }
+      )
+      "<strategy>"
     )
     "Strategy for minimax"
   , Option
@@ -134,6 +134,6 @@ main = do
       ++ "'s move:"
     putStrLn $ prettyBoard $ gameBoard g
     putStrLn ""
-    unless ((turn == 3 && optMode opts == Test) || isGameOver g) $ do
-      let g' = bestMove (optDepth opts) g
+    unless ((turn >= 3 && optMode opts == Test) || isGameOver g) $ do
+      let g' = bestMove (optPMStrategy opts) g
       loop (turn + 1) g' opts

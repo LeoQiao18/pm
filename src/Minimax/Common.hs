@@ -4,6 +4,7 @@ module Minimax.Common
   ( Depth
   ) where
 
+
 -- data MinimaxTree = MinimaxNode Int Board [MinimaxTree] | MinimaxLeaf Int Board
 type Depth = Int
 

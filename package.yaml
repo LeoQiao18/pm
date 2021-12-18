@@ -39,6 +39,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - pm
+    - split
     when:
     - condition: false
       other-modules: Paths_pm

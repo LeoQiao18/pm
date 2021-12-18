@@ -34,7 +34,7 @@ shouldMaximize Game { gamePlayer = Black } = False
 
 minimax :: Game -> Depth -> Depth -> Score
 minimax g parDepth depth
-  | parDepth > 0
+  | parDepth > 0 && depth > 0
   = let
       scores =
         map (\move -> minimax move (parDepth - 1) (depth - 1)) (legalMoves g)
@@ -43,7 +43,7 @@ minimax g parDepth depth
         if shouldMaximize g then maximum scores else minimum scores
     in
       optimalScore
-  | depth > 0
+  | parDepth <= 0 && depth > 0
   = let scores =
           map (\move -> minimax move parDepth (depth - 1)) (legalMoves g)
         optimalScore =
