@@ -3,12 +3,17 @@
 module Chess
   ( Board(..)
   , board
+  , BoardPiece(..)
   , Game(..)
   , Piece(..)
   , Position
   , Player(..)
   , atPos
+  , getBoardMatrix
+  , setBoardPiece
+  , setPlayer
   , prettyGame
+  , prettyBoard
   , defaultGame
   , defaultBoard
   ) where
@@ -19,6 +24,7 @@ import           Data.Matrix                              ( (!)
                                                           , Matrix
                                                           , fromLists
                                                           , matrix
+                                                          , setElem
                                                           , toLists
                                                           )
 
@@ -61,17 +67,33 @@ data Piece =
 
 type Position = (Int, Int)
 
+
 -- unsafe: get piece at position
-atPos :: Board -> Position -> BoardPiece
-atPos (Board b) pos = b ! pos
+atPos :: Game -> Position -> BoardPiece
+atPos g pos = getBoardMatrix g ! pos
+
+getBoardMatrix :: Game -> Matrix BoardPiece
+getBoardMatrix Game { gameBoard = Board b } = b
+
+-- update game board
+setBoardPiece :: Game -> Position -> BoardPiece -> Game
+setBoardPiece g@Game { gameBoard = Board b } pos bp =
+  g { gameBoard = Board $ setElem bp pos b }
+
+setPlayer :: Game -> Player -> Game
+setPlayer g p = g { gamePlayer = p }
+
 
 -- pretty print Game
 prettyGame :: Game -> String
-prettyGame g = "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard
-  (gameBoard g)
+prettyGame g =
+  "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard (gameBoard g)
+
+prettyBoard :: Board -> String
+prettyBoard (Board b) = intercalate "\n" . map prettyRow . toLists $ fmap
+  prettyBoardPiece
+  b
  where
-  prettyBoard (Board b) =
-    intercalate "\n" . map prettyRow . toLists $ fmap prettyBoardPiece b
   prettyRow row = "|" ++ intercalate "|" row ++ "|"
   prettyBoardPiece Nothing  = "  "
   prettyBoardPiece (Just p) = prettyPiece p
@@ -129,13 +151,3 @@ defaultBoard = board b
       , Just (White, Rook)
       ]
     ]
-
--- board evaluation
--- evaluateBoard :: Board -> Int
--- evaluateBoard (Board b) = foldl (foldl addPieceScore) 0 b
---   where addPieceScore score Nothing = score
---         addPieceScore score (Just (Black, p)) =
---         addPieceScore score (Just (White, p)) =
-
-
--- pieceFactorMap :: Piece

@@ -26,9 +26,11 @@ source-repository head
 library
   exposed-modules:
       Chess
-      Minimax
-      PM
-      Seq.Move
+      Minimax.Common
+      Minimax.Par.Move
+      Minimax.Seq.Move
+      Rules
+      Score
   other-modules:
       Paths_pm
   hs-source-dirs:
@@ -36,6 +38,7 @@ library
   build-depends:
       base >=4.7 && <5
     , matrix
+    , parallel
   default-language: Haskell2010
 
 executable pm
@@ -52,7 +55,9 @@ test-suite chess-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Tests.BoardScoreSpec
       Tests.GameSerializationSpec
+      Tests.MoveGenerationSpec
       Paths_pm
   hs-source-dirs:
       test/chess
