@@ -11,6 +11,7 @@ module Chess
   , atPos
   , prettyGame
   , prettyBoard
+  , parseBoard
   , defaultGame
   , defaultBoard
   ) where
@@ -22,6 +23,8 @@ import           Data.Matrix                              ( (!)
                                                           , fromLists
                                                           , matrix
                                                           , toLists
+                                                          , nrows
+                                                          , ncols
                                                           )
 
 data Game = Game
@@ -84,6 +87,38 @@ prettyBoard (Board b) = intercalate "\n" . map prettyRow . toLists $ fmap
     let player' = toLower . head . show $ player
         piece'  = toLower . head . show $ piece
     in  [player', piece']
+
+parseBoard :: String -> Board
+parseBoard text = case (nrows board, ncols board) of
+                    (8, 8) -> Board board
+                    _ -> error "ill-formatted initial board"
+  where board = fromLists $ map parseRow (lines text)
+        parseRow line = do w <- wordsWhen (==',') line
+                           return $ parsePiece w
+        parsePiece word = case word of
+          " " -> Nothing
+          (pl:pi:_) -> 
+            let player = case toLower pl of
+                           'b' -> Black
+                           'w' -> White 
+                           _ -> error ("invalid piece " ++ word) in
+            let piece = case toLower pi of
+                          'p' -> Pawn
+                          'k' -> Knight
+                          'b' -> Bishop
+                          'r' -> Rook
+                          'q' -> Queen
+                          'x' -> King
+                          _ -> error ("invalid piece " ++ word) in
+            Just (player, piece)
+          _ -> error ("invalid piece " ++ word)
+
+-- reference: https://stackoverflow.com/questions/4978578/how-to-split-a-string-in-haskell
+wordsWhen     :: (Char -> Bool) -> String -> [String]
+wordsWhen p s =  case dropWhile p s of
+                      "" -> []
+                      s' -> w : wordsWhen p s''
+                            where (w, s'') = break p s'
 
 -- default start game state
 defaultGame :: Game

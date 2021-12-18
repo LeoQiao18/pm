@@ -18,17 +18,20 @@ import           System.Exit                              ( exitSuccess )
 import           System.IO                                ( hPutStrLn
                                                           , print
                                                           , stderr
+                                                          , readFile
                                                           )
 
 import           Chess                                    ( Game(..)
+                                                          , Board(..)
                                                           , Player(..)
-                                                          , atPos
+                                                          , parseBoard
                                                           , defaultBoard
                                                           , defaultGame
                                                           , prettyBoard
                                                           )
 import           Control.Monad                            ( unless )
 import           Data.Monoid                              ( Alt(getAlt) )
+import           Data.Char                                ( isSpace )
 import           Minimax                                  ( Depth )
 import           Rules                                    ( isGameOver )
 import           Seq.Move                                 ( bestMove )
@@ -41,7 +44,7 @@ data PMStrategy
 
 data Mode
   = Interactive
-  | SingleMove
+  | Test
   deriving (Read, Show, Eq)
 
 data Options = Options
@@ -49,6 +52,7 @@ data Options = Options
   , optDepth      :: Depth
   , optMode       :: Mode
   , optPlayer     :: Player
+  , optBoardSrc   :: String
   }
   deriving (Show, Eq)
 
@@ -57,6 +61,7 @@ defaultOptions = Options { optPMStrategy = MinimaxSeq
                          , optDepth      = 5
                          , optMode       = Interactive
                          , optPlayer     = Black
+                         , optBoardSrc   = ""
                          }
 
 usage :: IO Options
@@ -89,6 +94,11 @@ options =
     ["player"]
     (ReqArg (\player opt -> return opt { optPlayer = read player }) "<player>")
     "Player that the engine is playing as"
+  , Option 
+    "b"
+    ["boardSrc"]
+    (ReqArg (\boardSrc opt -> return opt { optBoardSrc = boardSrc }) "<boardSrc>")
+    "File path specifying custom initial board layout"
   , Option "h" ["help"] (NoArg (const usage)) "Print help"
   ]
 
@@ -99,9 +109,16 @@ main = do
   opts <- foldl (>>=) (return defaultOptions) actions
   mapM_ putStrLn filenames
   print opts
-  loop 1 defaultGame
+  startGame opts 
  where
-  loop turn g = do
+  startGame opts@Options { optBoardSrc = src, optPlayer = player } = do 
+    g <- initGame src player
+    loop 1 g opts
+  initGame src player
+    | null src || all isSpace src = return Game { gamePlayer = player, gameBoard = defaultBoard } 
+    | otherwise = do contents <- readFile src
+                     return Game { gamePlayer = player, gameBoard = parseBoard contents}
+  loop turn g opts = do
     putStrLn
       $  "> Turn "
       ++ show turn
@@ -110,6 +127,6 @@ main = do
       ++ "'s move:"
     putStrLn $ prettyBoard $ gameBoard g
     putStrLn ""
-    unless (isGameOver g) $ do
-      let g' = bestMove 5 g
-      loop (turn + 1) g'
+    unless ((turn == 3 && optMode opts == Test) || isGameOver g) $ do
+      let g' = bestMove (optDepth opts) g
+      loop (turn + 1) g' opts
