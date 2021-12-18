@@ -3,20 +3,19 @@
 module Chess
   ( Board(..)
   , board
+  , BoardPiece(..)
   , Game(..)
   , Piece(..)
   , Position
   , Player(..)
   , atPos
+  , getBoardMatrix
+  , setBoardPiece
+  , setPlayer
   , prettyGame
+  , prettyBoard
   , defaultGame
   , defaultBoard
-  , gameScore
-  , boardScore
-  , positionScore
-  , boardPieceScore
-  , pieceScore
-  , positionMultiplier
   ) where
 import           Data.Bifunctor                           ( first )
 import           Data.Char                                ( toLower )
@@ -25,6 +24,7 @@ import           Data.Matrix                              ( (!)
                                                           , Matrix
                                                           , fromLists
                                                           , matrix
+                                                          , setElem
                                                           , toLists
                                                           )
 
@@ -67,21 +67,33 @@ data Piece =
 
 type Position = (Int, Int)
 
-type Score = Int
-
-type Multiplier = Int
 
 -- unsafe: get piece at position
-atPos :: Board -> Position -> BoardPiece
-atPos (Board b) pos = b ! pos
+atPos :: Game -> Position -> BoardPiece
+atPos g pos = getBoardMatrix g ! pos
+
+getBoardMatrix :: Game -> Matrix BoardPiece
+getBoardMatrix Game { gameBoard = Board b } = b
+
+-- update game board
+setBoardPiece :: Game -> Position -> BoardPiece -> Game
+setBoardPiece g@Game { gameBoard = Board b } pos bp =
+  g { gameBoard = Board $ setElem bp pos b }
+
+setPlayer :: Game -> Player -> Game
+setPlayer g p = g { gamePlayer = p }
+
 
 -- pretty print Game
 prettyGame :: Game -> String
-prettyGame g = "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard
-  (gameBoard g)
+prettyGame g =
+  "> Player: " ++ show (gamePlayer g) ++ "\n" ++ prettyBoard (gameBoard g)
+
+prettyBoard :: Board -> String
+prettyBoard (Board b) = intercalate "\n" . map prettyRow . toLists $ fmap
+  prettyBoardPiece
+  b
  where
-  prettyBoard (Board b) =
-    intercalate "\n" . map prettyRow . toLists $ fmap prettyBoardPiece b
   prettyRow row = "|" ++ intercalate "|" row ++ "|"
   prettyBoardPiece Nothing  = "  "
   prettyBoardPiece (Just p) = prettyPiece p
@@ -139,49 +151,3 @@ defaultBoard = board b
       , Just (White, Rook)
       ]
     ]
-
--- board evaluation
--- evaluateBoard :: Board -> Score
--- evaluateBoard (Board b) = foldl (foldl addPieceScore) 0 b
---   where addPieceScore score Nothing = score
---         addPieceScore score (Just (Black, p)) =
---         addPieceScore score (Just (White, p)) =
-
-
-
-
--- score
-gameScore :: Game -> Score
-gameScore g = boardScore $ gameBoard g
-
-boardScore :: Board -> Score
-boardScore (Board b) = foldl
-  (\score pos -> score + positionScore (b ! pos) pos)
-  0
-  indicies
-  where indicies = [ (r, c) | r <- [1 .. 8], c <- [1 .. 8] ]
-
-positionScore :: BoardPiece -> Position -> Score
-positionScore bp pos = multiplier * score
- where
-  multiplier = positionMultiplier bp pos
-  score      = boardPieceScore bp
-
-boardPieceScore :: BoardPiece -> Score
-boardPieceScore Nothing           = 0
-boardPieceScore (Just (Black, p)) = -1 * pieceScore p
-boardPieceScore (Just (White, p)) = pieceScore p
-
-pieceScore :: Piece -> Score
-pieceScore Pawn   = 10
-pieceScore Knight = 30
-pieceScore Bishop = 30
-pieceScore Rook   = 50
-pieceScore Queen  = 90
-pieceScore King   = 900
-
--- positionMultiplier
-positionMultiplier :: BoardPiece -> Position -> Multiplier
-positionMultiplier Nothing           = const 0
-positionMultiplier (Just (Black, p)) = const 1
-positionMultiplier (Just (White, p)) = const 1
