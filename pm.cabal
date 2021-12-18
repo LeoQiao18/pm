@@ -30,6 +30,7 @@ library
       Minimax.Move
       Minimax.Par.Move
       Minimax.Seq.Move
+      Minimax.SeqAB.Move
       Rules
       Score
   other-modules:

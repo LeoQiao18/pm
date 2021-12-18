@@ -15,7 +15,7 @@ import           Score                                    ( Score
 
 bestMove :: Depth -> Game -> Game
 bestMove d g =
-  let movesWithScores = [ (move, minimax move d) | move <- legalMoves g ]
+  let movesWithScores = [ (move, minimax (d - 1) move) | move <- legalMoves g ]
       comparator      = if shouldMaximize g
         then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
         else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
@@ -26,13 +26,15 @@ shouldMaximize :: Game -> Bool
 shouldMaximize Game { gamePlayer = White } = True
 shouldMaximize Game { gamePlayer = Black } = False
 
-minimax :: Game -> Depth -> Score
-minimax g 0 = gameScore g
-minimax g d =
-  let scores = [ minimax move (d - 1) | move <- legalMoves g ]
-      optimalScore =
-        if shouldMaximize g then maximum scores else minimum scores
-  in  optimalScore
+minimax :: Depth -> Game -> Score
+minimax d g
+  | d <= 0
+  = gameScore g
+  | otherwise
+  = let scores = [ minimax (d - 1) move | move <- legalMoves g ]
+        optimalScore =
+          if shouldMaximize g then maximum scores else minimum scores
+    in  optimalScore
 -- getNextMove :: Board -> Player -> Depth -> Board
 -- getNextMove board player depth = case getOptimalMoves tree of
 --   (x : _) -> getTreeBoard x

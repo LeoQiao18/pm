@@ -1,6 +1,6 @@
--- | Move generation by parallel minimax algorithm
+-- | Move generation by sequential minimax algorithm with alpha-beta pruning
 
-module Minimax.Par.Move
+module Minimax.SeqAB.Move
   ( bestMove
   ) where
 
@@ -13,19 +13,10 @@ import           Score                                    ( Score
                                                           , gameScore
                                                           )
 
-import           Control.Parallel.Strategies              ( evalTuple2
-                                                          , parList
-                                                          , rseq
-                                                          , using
-                                                          )
-
-bestMove :: Depth -> Depth -> Game -> Game
-bestMove parDepth depth g =
-  let evalStrat = if parDepth > 0 then parList (evalTuple2 rseq rseq) else rseq
-      movesWithScores =
-        map (\move -> (move, minimax (parDepth - 1) (depth - 1) move))
-            (legalMoves g)
-          `using` evalStrat
+bestMove :: Depth -> Game -> Game
+bestMove d g =
+  let movesWithScores =
+        [ (move, minimax (d - 1) (-10000) 10000 move) | move <- legalMoves g ]
       comparator = if shouldMaximize g
         then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
         else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
@@ -36,20 +27,28 @@ shouldMaximize :: Game -> Bool
 shouldMaximize Game { gamePlayer = White } = True
 shouldMaximize Game { gamePlayer = Black } = False
 
-minimax :: Depth -> Depth -> Game -> Score
-minimax parDepth depth g
-  | depth > 0
-  = let
-      evalStrat = if parDepth > 0 then parList rseq else rseq
-      scores =
-        map (minimax (parDepth - 1) (depth - 1)) (legalMoves g)
-          `using` evalStrat
-      optimalScore =
-        if shouldMaximize g then maximum scores else minimum scores
-    in
-      optimalScore
-  | otherwise
+minimax :: Depth -> Score -> Score -> Game -> Score
+minimax d alpha beta g
+  | d <= 0
   = gameScore g
+  | shouldMaximize g
+  = let optimalScore _ prevBest [] = prevBest
+        optimalScore alpha' prevBest (move : moves) =
+          let currBest = max prevBest (minimax (d - 1) alpha' beta move)
+              alpha''  = max alpha' currBest
+          in  if beta <= alpha''
+                then currBest
+                else optimalScore alpha'' currBest moves
+    in  optimalScore alpha (-9999) (legalMoves g)
+  | otherwise
+  = let optimalScore _ prevBest [] = prevBest
+        optimalScore beta' prevBest (move : moves) =
+          let currBest = min prevBest (minimax (d - 1) alpha beta' move)
+              beta''   = min beta' currBest
+          in  if beta'' <= alpha
+                then currBest
+                else optimalScore beta'' currBest moves
+    in  optimalScore beta 9999 (legalMoves g)
 -- getNextMove :: Board -> Player -> Depth -> Board
 -- getNextMove board player depth = case getOptimalMoves tree of
 --   (x : _) -> getTreeBoard x
