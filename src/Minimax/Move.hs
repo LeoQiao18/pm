@@ -4,7 +4,9 @@ module Minimax.Move
     ) where
 
 import           Chess                                    ( Game(..) )
-import           Minimax.Common                           ( Depth )
+import           Minimax.Common                           ( Depth
+                                                          , ThreadCap
+                                                          )
 import qualified Minimax.Par.Move              as P
 import qualified Minimax.ParAB.Move            as PAB
 import qualified Minimax.Seq.Move              as S
@@ -14,7 +16,7 @@ data PMStrategy
   = MinimaxSeq Depth
   | MinimaxPar Depth Depth -- parDepth, depth
   | MinimaxSeqAB Depth
-  | MinimaxParAB Depth
+  | MinimaxParAB Depth ThreadCap
   deriving (Read, Show, Eq)
 
 
@@ -23,4 +25,4 @@ bestMove pmStrat g = case pmStrat of
     MinimaxSeq depth          -> S.bestMove depth g
     MinimaxPar parDepth depth -> P.bestMove parDepth depth g
     MinimaxSeqAB depth        -> SAB.bestMove depth g
-    MinimaxParAB depth        -> PAB.bestMove depth g
+    MinimaxParAB depth t_cap  -> PAB.bestMove depth t_cap g

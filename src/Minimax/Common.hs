@@ -2,11 +2,13 @@
 
 module Minimax.Common
   ( Depth
+  , ThreadCap
   ) where
 
 
 -- data MinimaxTree = MinimaxNode Int Board [MinimaxTree] | MinimaxLeaf Int Board
 type Depth = Int
+type ThreadCap = Int 
 
 -- getTreeVal :: MinimaxTree -> Int
 -- getTreeVal tree = case tree of

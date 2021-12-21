@@ -10,26 +10,40 @@ import           Chess                                    ( Game(..)
 import           Control.Parallel.Strategies              ( evalTuple2
                                                           , parList
                                                           , rseq
+                                                          , rpar
                                                           , using
                                                           )
-import           Minimax.Common                           ( Depth )
+import           Minimax.Common                           ( Depth
+                                                          , ThreadCap
+                                                          )
 import           Rules                                    ( legalMoves )
 import           Score                                    ( Score
                                                           , gameScore
                                                           )
+bestMove :: Depth -> ThreadCap -> Game -> Game
+bestMove depth t_cap game = fst $ bestMoveWithScore depth t_cap game
+  where bestMoveWithScore d cap g 
+          | length nextMoves < cap = foldr1 comparator nextMovesWithScores
+          | otherwise = let childScores = map (bestMoveWithScore (d - 1) (cap `quot` length nextMoves)) nextMoves in
+                        foldr1 comparator childScores
+          where nextMoves = legalMoves g
+                nextMovesWithScores = map (\move -> (move, minimax (d - 1) (-10000) 10000 move)) nextMoves `using` rpar
+                comparator = if shouldMaximize g
+                  then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
+                  else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
 
-bestMove :: Depth -> Game -> Game
-bestMove d g =
-  let movesWithScores =
-        -- [ (move, minimax (d - 1) (-10000) 10000 move) | move <- legalMoves g ]
-        map (\move -> (move, minimax (d - 1) (-10000) 10000 move))
-            (legalMoves g)
-          `using` parList (evalTuple2 rseq rseq)
-      comparator = if shouldMaximize g
-        then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
-        else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
-      optimalMove = fst $ foldr1 comparator movesWithScores
-  in  optimalMove
+-- bestMove :: Depth -> Game -> Game
+-- bestMove d g =
+--   let movesWithScores =
+--         -- [ (move, minimax (d - 1) (-10000) 10000 move) | move <- legalMoves g ]
+--         map (\move -> (move, minimax (d - 1) (-10000) 10000 move))
+--             (legalMoves g)
+--           `using` parList (evalTuple2 rseq rseq)
+--       comparator = if shouldMaximize g
+--         then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
+--         else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
+--       optimalMove = fst $ foldr1 comparator movesWithScores
+--   in  optimalMove
 
 shouldMaximize :: Game -> Bool
 shouldMaximize Game { gamePlayer = White } = True
