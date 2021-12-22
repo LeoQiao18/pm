@@ -48,7 +48,7 @@ executable pm
   main-is: Main.hs
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -eventlog -with-rtsopts=-N
+  ghc-options: -O2 -threaded -rtsopts -eventlog -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , pm
@@ -65,7 +65,7 @@ test-suite chess-test
       Paths_pm
   hs-source-dirs:
       test/chess
-  ghc-options: -threaded -rtsopts -eventlog -with-rtsopts=-N
+  ghc-options: -O2 -threaded -rtsopts -eventlog -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , hspec

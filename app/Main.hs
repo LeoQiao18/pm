@@ -128,14 +128,15 @@ main = do
       contents <- readFile src
       return Game { gamePlayer = player, gameBoard = parseBoard contents }
   loop turn g opts = do
-    putStrLn
-      $  "> Turn "
-      ++ show turn
-      ++ ", "
-      ++ show (gamePlayer g)
-      ++ "'s move:"
-    putStrLn $ prettyBoard $ gameBoard g
-    putStrLn ""
+    unless (optMode opts == Test) $ do
+      putStrLn
+        $  "> Turn "
+        ++ show turn
+        ++ ", "
+        ++ show (gamePlayer g)
+        ++ "'s move:"
+      putStrLn $ prettyBoard $ gameBoard g
+      putStrLn ""
     unless ((turn >= 3 && optMode opts == Test) || isGameOver g) $ do
       let g' = bestMove (optPMStrategy opts) g
       loop (turn + 1) g' opts
