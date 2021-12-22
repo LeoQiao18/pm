@@ -18,31 +18,60 @@ import           Score                                    ( Score
                                                           , gameScore
                                                           )
 
-bestMove :: Depth -> Game -> Game
-bestMove d g =
-  let movesWithScores =
-        -- [ (move, minimax (d - 1) (-10000) 10000 move) | move <- legalMoves g ]
-        map (\move -> (move, minimax (d - 1) (-10000) 10000 move))
-            (legalMoves g)
-          `using` parList (evalTuple2 rseq rseq)
+bestMove :: Depth -> Depth -> Game -> Game
+bestMove parDepth d g
+  | parDepth <= 1
+  = let
+      movesWithScores =
+        [ (move, minimaxAB (d - 1) (-10000) 10000 move) | move <- legalMoves g ]
+        `using` parList (evalTuple2 rseq rseq)
       comparator = if shouldMaximize g
         then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
         else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
       optimalMove = fst $ foldr1 comparator movesWithScores
-  in  optimalMove
+    in
+      optimalMove
+  | otherwise
+  = let movesWithScores =
+          [ (move, minimax (parDepth - 1) (d - 1) move) | move <- legalMoves g ]
+          `using` parList (evalTuple2 rseq rseq)
+        comparator = if shouldMaximize g
+          then \x@(_, xscore) y@(_, yscore) -> if xscore >= yscore then x else y
+          else \x@(_, xscore) y@(_, yscore) -> if xscore <= yscore then x else y
+        optimalMove = fst $ foldr1 comparator movesWithScores
+    in  optimalMove
 
 shouldMaximize :: Game -> Bool
 shouldMaximize Game { gamePlayer = White } = True
 shouldMaximize Game { gamePlayer = Black } = False
 
-minimax :: Depth -> Score -> Score -> Game -> Score
-minimax d alpha beta g
+minimax :: Depth -> Depth -> Game -> Score
+minimax parDepth d g
+  | d <= 0
+  = gameScore g
+  | parDepth <= 1
+  = let scores =
+          [ minimaxAB (d - 1) (-10000) 10000 move | move <- legalMoves g ]
+          `using` parList rseq
+        optimalScore =
+          if shouldMaximize g then maximum scores else minimum scores
+    in  optimalScore
+  | otherwise
+  = let scores =
+          [ minimax (parDepth - 1) (d - 1) move | move <- legalMoves g ]
+          `using` parList rseq
+        optimalScore =
+          if shouldMaximize g then maximum scores else minimum scores
+    in  optimalScore
+
+minimaxAB :: Depth -> Score -> Score -> Game -> Score
+minimaxAB d alpha beta g
   | d <= 0
   = gameScore g
   | shouldMaximize g
   = let optimalScore _ prevBest [] = prevBest
         optimalScore alpha' prevBest (move : moves) =
-          let currBest = max prevBest (minimax (d - 1) alpha' beta move)
+          let currBest = max prevBest (minimaxAB (d - 1) alpha' beta move)
               alpha''  = max alpha' currBest
           in  if beta <= alpha''
                 then currBest
@@ -51,7 +80,7 @@ minimax d alpha beta g
   | otherwise
   = let optimalScore _ prevBest [] = prevBest
         optimalScore beta' prevBest (move : moves) =
-          let currBest = min prevBest (minimax (d - 1) alpha beta' move)
+          let currBest = min prevBest (minimaxAB (d - 1) alpha beta' move)
               beta''   = min beta' currBest
           in  if beta'' <= alpha
                 then currBest

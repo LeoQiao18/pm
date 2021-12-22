@@ -86,7 +86,7 @@ options =
               "MinimaxPar" ->
                 MinimaxPar (read $ splitStrat !! 1) (read $ splitStrat !! 2)
               "MinimaxSeqAB" -> MinimaxSeqAB (read $ splitStrat !! 1)
-              "MinimaxParAB" -> MinimaxParAB (read $ splitStrat !! 1)
+              "MinimaxParAB" -> MinimaxParAB (read $ splitStrat !! 1) (read $ splitStrat !! 2)
               _              -> error "Invalid PMStrategy"
         in  return opt { optPMStrategy = pmStrat' }
       )
