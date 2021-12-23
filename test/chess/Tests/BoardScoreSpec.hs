@@ -13,35 +13,6 @@ import           Test.Hspec                               ( Spec(..)
                                                           , shouldBe
                                                           )
 
--- testBoard1 = board b
---  where
---   b =
---     [ [ Just (Black, Rook)
---       , Nothing
---       , Just (Black, Queen)
---       , Just (Black, Pawn)
---       , Nothing
---       , Nothing
---       , Nothing
---       , Nothing
---       ]
---     , [ Nothing
---       , Nothing
---       , Just (White, Knight)
---       , Nothing
---       , Just (Black, Knight)
---       , Nothing
---       , Nothing
---       , Nothing
---       ]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     , [Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]
---     ]
-
 spec :: Spec
 spec = do
   it "initial game should have 0 score" $ do
